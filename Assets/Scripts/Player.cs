@@ -24,11 +24,34 @@ public class Player : MonoBehaviour
             transform.position + Vector3.up * playerHeight,
             playerRadius, moveDir, moveDistance);
 
-        if (canMove)
+        if (!canMove)
         {
-            transform.position += moveDistance * moveDir;
+            // Attempt only x movement
+            Vector3 moveDirx = new Vector3(moveDir.x, 0, 0).normalized;
+            canMove = !Physics.CapsuleCast(transform.position,
+            transform.position + Vector3.up * playerHeight,
+            playerRadius, moveDirx, moveDistance);
+
+            if (canMove)
+                transform.position += moveDistance * moveDirx;
+
+            else
+            {
+                // Attempt only x movement
+                Vector3 moveDirz = new Vector3(0, 0, moveDir.z).normalized;
+                canMove = !Physics.CapsuleCast(transform.position,
+                transform.position + Vector3.up * playerHeight,
+                playerRadius, moveDirz, moveDistance);
+
+                if (canMove)
+                    transform.position += moveDistance * moveDirz;
+            }
+
         }
 
+        else
+            transform.position += moveDistance * moveDir;
+        
 
         // Detect if the player is walking or not
         isWalking = moveDir != Vector3.zero;
