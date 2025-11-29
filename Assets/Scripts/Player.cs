@@ -4,6 +4,9 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float rotateSpeed = 10f;
+    [SerializeField] private float playerRadius = .7f;
+    [SerializeField] private float playerHeight = 2f;
+
     [SerializeField] private GameInput gameInput;
 
     private bool isWalking;
@@ -13,7 +16,18 @@ public class Player : MonoBehaviour
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
         Vector3 moveDir = new(inputVector.x, 0f, inputVector.y);
-        transform.position += moveSpeed * Time.deltaTime * moveDir;
+        
+        float moveDistance = moveSpeed * Time.deltaTime;
+
+        // Detect Collision
+        bool canMove = !Physics.CapsuleCast(transform.position, 
+            transform.position + Vector3.up * playerHeight,
+            playerRadius, moveDir, moveDistance);
+
+        if (canMove)
+        {
+            transform.position += moveDistance * moveDir;
+        }
 
 
         // Detect if the player is walking or not
