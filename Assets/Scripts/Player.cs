@@ -10,17 +10,27 @@ public class Player : MonoBehaviour
     [SerializeField] private GameInput gameInput;
 
     private bool isWalking;
+    private Vector3 lastInteractDir;
 
     private void Update()
     {
+        HandleMovement();
+        HandleInteractions();
+    }
+
+    public bool IsWalking() => isWalking;
+
+    private void HandleMovement()
+    {
+
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
         Vector3 moveDir = new(inputVector.x, 0f, inputVector.y);
-        
+
         float moveDistance = moveSpeed * Time.deltaTime;
 
         // Detect Collision
-        bool canMove = !Physics.CapsuleCast(transform.position, 
+        bool canMove = !Physics.CapsuleCast(transform.position,
             transform.position + Vector3.up * playerHeight,
             playerRadius, moveDir, moveDistance);
 
@@ -51,7 +61,7 @@ public class Player : MonoBehaviour
 
         else
             transform.position += moveDistance * moveDir;
-        
+
 
         // Detect if the player is walking or not
         isWalking = moveDir != Vector3.zero;
@@ -62,6 +72,25 @@ public class Player : MonoBehaviour
             rotateSpeed * Time.deltaTime);
     }
 
-    public bool IsWalking() => isWalking;
+    private void HandleInteractions()
+    {
+        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+
+        Vector3 moveDir = new(inputVector.x, 0f, inputVector.y);
+
+        if(moveDir !=  Vector3.zero)
+            lastInteractDir = moveDir;
+
+        float interactDistance = 2f;
+
+        if (Physics.Raycast(transform.position, lastInteractDir,
+            out RaycastHit raycastHit, interactDistance))
+        {
+            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
+            {
+                clearCounter.Interact();
+            }
+        }
+    }
 
 }
